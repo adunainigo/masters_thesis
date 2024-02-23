@@ -1,18 +1,9 @@
-[submodule "path/to/robot_demonstrator"]
-	path = path/to/robot_demonstrator
+[submodule "libs/robot_demonstrator"]
+	path = libs/robot_demonstrator
 	url = https://github.com/MatthiasDR96/robot_demonstrator.git
-[submodule "path/to/robustness"]
-	path = path/to/robustness
+[submodule "libs/robustness"]
+	path = libs/robustness
 	url = https://github.com/hendrycks/robustness.git
-[submodule "path/to/Pytorch-UNet"]
-	path = path/to/Pytorch-UNet
-	url = https://github.com/milesial/Pytorch-UNet.git
-[submodule "imported/robot_demonstrator"]
-	path = imported/robot_demonstrator
-	url = https://github.com/MatthiasDR96/robot_demonstrator.git
-[submodule "imported/robustness"]
-	path = imported/robustness
-	url = https://github.com/hendrycks/robustness.git
-[submodule "imported/Pytorch-UNet"]
-	path = imported/Pytorch-UNet
+[submodule "libs/Pytorch-UNet"]
+	path = libs/Pytorch-UNet
 	url = https://github.com/milesial/Pytorch-UNet.git
