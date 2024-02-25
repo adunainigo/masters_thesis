@@ -29,13 +29,13 @@ TRAIN_MASK_DIR = "data/train_masks/"
 VAL_IMG_DIR = "data/val_images/"
 VAL_MASK_DIR = "data/val_masks/"
 
+
 def train_fn(loader, model, optimizer, loss_fn, scaler):
     loop = tqdm(loader)
 
     for batch_idx, (data, targets) in enumerate(loop):
         data = data.to(device=DEVICE)
         targets = targets.float().unsqueeze(1).to(device=DEVICE)
-
         # forward
         with torch.cuda.amp.autocast():
             predictions = model(data)
@@ -52,18 +52,19 @@ def train_fn(loader, model, optimizer, loss_fn, scaler):
 
 
 def main():
+    #Definition of image transformations using Albumentations ('A') used for data augmentation  
     train_transform = A.Compose(
         [
             A.Resize(height=IMAGE_HEIGHT, width=IMAGE_WIDTH),
-            A.Rotate(limit=35, p=1.0),
-            A.HorizontalFlip(p=0.5),
-            A.VerticalFlip(p=0.1),
-            A.Normalize(
+            A.Rotate(limit=35, p=1.0), #Rotation +-35º p=1=> En todas las imágenes
+            A.HorizontalFlip(p=0.5),   #Mirror horizontally images with prob 50%
+            A.VerticalFlip(p=0.1),     #Mirror vertivally images with prob 50%
+            A.Normalize(               #Image normalization -mean/std 
                 mean=[0.0, 0.0, 0.0],
                 std=[1.0, 1.0, 1.0],
                 max_pixel_value=255.0, #division by 255 to get a division between 0-1
             ),
-            ToTensorV2(),
+            ToTensorV2(),              #Convert images to Python tensors and change channel order from HWC (Height,Width,Channel) to CHW
         ],
     )
 
