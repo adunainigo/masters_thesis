@@ -74,14 +74,14 @@ def check_accuracy(loader, model, device="cuda"):
             dice_score += (2 * TP) / (2 * TP + FP + FN + 1e-8)  # Añadido 1e-8 para evitar división por cero
 
     # Dice score and accuracy calculation
-    accuracy = (num_correct / num_pixels * 100)
-    dice_score = (dice_score / len(loader) * 100)
+    accuracy = (num_correct / num_pixels)
+    dice_score /= len(loader)
     
-    print(f"Accuracy: {accuracy:.2f}%")
-    print(f"Dice score: {dice_score:.2f}%")
+    print(f"Accuracy: {accuracy*100:.2f}%")
+    print(f"Dice score: {dice_score*100:.4f}%")
     
     model.train()
-    return accuracy, dice_score
+    return accuracy*100, dice_score*100
 
 def save_predictions_as_imgs(
     loader, model, folder="saved_images/", device="cuda"

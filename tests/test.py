@@ -18,8 +18,8 @@ PREDICTED_IMAGE_DIR = "./predicted_images"
 os.makedirs(PREDICTED_IMAGE_DIR, exist_ok=True)
 
 # Define the image height and width
-IMAGE_HEIGHT = 135 #135,270,540,1080
-IMAGE_WIDTH = 240  #240,480,960,1920
+IMAGE_HEIGHT = 270 #135,270,540,1080
+IMAGE_WIDTH  = 480  #240,480,960,1920
 
 # Define the validation transforms
 test_transforms = A.Compose(

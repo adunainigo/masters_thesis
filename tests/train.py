@@ -19,7 +19,7 @@ from utils import (
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = 4
-NUM_EPOCHS = 20
+NUM_EPOCHS = 50
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 270 #135,270,540,1080
 IMAGE_WIDTH = 480  #240,480,960,1920
@@ -31,17 +31,23 @@ TRAIN_MASK_DIR = "data/train_masks/"
 VAL_IMG_DIR = "data/val_images/"
 VAL_MASK_DIR = "data/val_masks/"
 GRAPH_DIR    = "./graph_dir"
+
+#EARLY STOPPING
+BEST_ACCURACY = 0.0
+BEST_DICE_SCORE = 0.0
+PATIENCE=10
+PATIENCE_COUNTER=0
+
+
 #graph variables
-#1.- Loss funcion: 
 loss_list=[]
-#2.- Accuracy
 accuracy_list=[]
-#3.- Dice Score
 dice_score_list=[]
+
 
 def plot_metrics(graph_dir,list1,list2=None,num_epochs=None,lr=None,label1=None,label2=None):
     index=0
-    epochs=list(range(1,num_epochs +1))
+    epochs=list(range(1,len(list1) +1))
     plt.plot(epochs, list1, color='blue', label=label1)
     if list2 is not None:
         index=1
@@ -137,28 +143,45 @@ def main():
 
     for epoch in range(NUM_EPOCHS):
         train_fn(train_loader, model, optimizer, loss_fn, scaler)
-
-        # save model
-        checkpoint = {
-            "state_dict": model.state_dict(),
-            "optimizer":optimizer.state_dict(),
-        }
-        save_checkpoint(checkpoint)
-
-        # check accuracy
+        global BEST_ACCURACY, BEST_DICE_SCORE,PATIENCE,PATIENCE_COUNTER
+        #check accuracy and dice score
         accuracy,dice_score=check_accuracy(val_loader, model, device=DEVICE)
-        #acuracy_saving_for graph
+        
+        #Save metrics for graph
         accuracy_list.append(accuracy.item())
-        #dice_score_saving_for_graph
         dice_score_list.append(dice_score.item())
         
+        #check if this is the best model
+        if (accuracy > BEST_ACCURACY*0.8) and (dice_score > BEST_DICE_SCORE):
+            BEST_ACCURACY=accuracy
+            BEST_DICE_SCORE=dice_score
+            print(f"Epoch {epoch+1}, New best model with accuracy: {accuracy.item():.4f}, Dice Score: {dice_score.item():.4f}")
+            
+            #Save model
+            checkpoint = {
+            "state_dict": model.state_dict(),
+            "optimizer": optimizer.state_dict(),
+            }
+            
+            save_checkpoint(checkpoint)
+            PATIENCE_COUNTER=0 #Reset patience
+        else:
+            PATIENCE_COUNTER+=1
+            print(f"Epoch {epoch+1}, No improvement. Patience: {PATIENCE_COUNTER}/{PATIENCE}")
+        if PATIENCE_COUNTER >=PATIENCE:
+            print("Early stopping triggered. No improvement in {patience} epochs.")
+            print(f"Best model: Accuracy= {BEST_ACCURACY:.4f}, Dice_score= {BEST_DICE_SCORE:.4f}.")
+            break
         # print some examples to a folder
         save_predictions_as_imgs(
             val_loader, model, folder="saved_images/", device=DEVICE
         )
+        
     plot_metrics(GRAPH_DIR,accuracy_list,dice_score_list,NUM_EPOCHS,LEARNING_RATE,"Accuracy","Dice_score")
     plot_metrics(graph_dir=GRAPH_DIR,list1=loss_list,num_epochs=NUM_EPOCHS,lr=LEARNING_RATE,label1="loss_fn")
 if __name__ == "__main__":
     main()
+    
+    
     
     
