@@ -1,4 +1,5 @@
 import torch
+import matplotlib.pyplot as plt
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from tqdm import tqdm
@@ -17,18 +18,40 @@ from utils import (
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = 4
-NUM_EPOCHS = 50
+NUM_EPOCHS = 5
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 270 #135,270,540,1080
 IMAGE_WIDTH = 480  #240,480,960,1920
-PIN_MEMORY = True
+PIN_MEMORY = False 
 LOAD_MODEL = False
 #Directories
 TRAIN_IMG_DIR = "data/train_images/"
 TRAIN_MASK_DIR = "data/train_masks/"
 VAL_IMG_DIR = "data/val_images/"
 VAL_MASK_DIR = "data/val_masks/"
+GRAPH_DIR    = "./graph_dir"
+#graph variables
+#1.- Loss funcion: 
+loss_list=[]
+#2.- Accuracy
+accuracy_list=[]
+#3.- Dice Score
+dice_score_list=[]
 
+def plot_metrics(graph_dir,list1,list2=None,num_epochs=None,lr=None,label1=None,label2=None):
+    epochs=range(1,num_epochs +1)
+    plt.plot(epochs,list1,label1,color='blue')
+    if list2 is not None:
+        plt.plot(epochs,list2,label2,color='red')
+    plt.title(f'Metrics over epochs (LR: {learning_rate})')
+    plt.xlabel('Epoch')
+    plt.ylabel('Value')
+    plt.legend()
+    plt.grid(True)
+    
+    if not os.path.exists(graph_dir):
+        os.makedirs(graph_dir)
+    plt.savefig(f"{graph_dir}/lr_{lr}_ep_{num_epochs}.png")
 
 def train_fn(loader, model, optimizer, loss_fn, scaler):
     loop = tqdm(loader)
@@ -40,7 +63,7 @@ def train_fn(loader, model, optimizer, loss_fn, scaler):
         with torch.cuda.amp.autocast():
             predictions = model(data)
             loss = loss_fn(predictions, targets)
-
+            loss_list.append(loss.item())
         # backward
         optimizer.zero_grad()
         scaler.scale(loss).backward()
@@ -117,13 +140,22 @@ def main():
         save_checkpoint(checkpoint)
 
         # check accuracy
+        #accuracy,dice_score=check_accuracy(val_loader, model, device=DEVICE)
+        #print(accuracy)
         check_accuracy(val_loader, model, device=DEVICE)
-
+        #acuracy_saving_for graph
+        #accuracy_list.append(accuracy.item())
+        #dice_score_saving_for_graph
+        #dice_score_list.append(dice_score.item())
+        
         # print some examples to a folder
         save_predictions_as_imgs(
             val_loader, model, folder="saved_images/", device=DEVICE
         )
-
-
+    print(accuracy_list)
+    #plot_metrics(GRAPH_DIR,accuracy_list,dice_score_list,NUM_EPOCHS,LEARNING_RATE,"Accuracy","Dice_score")
+    
 if __name__ == "__main__":
     main()
+    
+    
