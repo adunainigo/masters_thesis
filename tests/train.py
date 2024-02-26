@@ -19,7 +19,7 @@ from utils import (
 LEARNING_RATE = 1e-4
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 BATCH_SIZE = 4
-NUM_EPOCHS = 50
+NUM_EPOCHS = 20
 NUM_WORKERS = 2
 IMAGE_HEIGHT = 270 #135,270,540,1080
 IMAGE_WIDTH = 480  #240,480,960,1920
@@ -41,11 +41,11 @@ dice_score_list=[]
 
 def plot_metrics(graph_dir,list1,list2=None,num_epochs=None,lr=None,label1=None,label2=None):
     index=0
-    epochs=range(1,num_epochs +1)
-    plt.plot(list(epochs), list1, color='blue', label=label1)
+    epochs=list(range(1,num_epochs +1))
+    plt.plot(epochs, list1, color='blue', label=label1)
     if list2 is not None:
         index=1
-        plt.plot(list(epochs), list2, color='red', label=label2)
+        plt.plot(epochs, list2, color='red', label=label2)
     plt.title(f'Metrics over epochs (LR: {lr})')
     plt.xlabel('Epoch')
     plt.ylabel('Value')

@@ -61,25 +61,27 @@ def check_accuracy(loader, model, device="cuda"):
     with torch.no_grad():
         for x, y in loader:
             x = x.to(device)
-            y = y.to(device).unsqueeze(1)
+            y = y.to(device).unsqueeze(1)  # Asegúrate de que esta operación es necesaria según tu modelo
             preds = torch.sigmoid(model(x))
-            #All >0.5 to 1, others to 0
-            #Adapt if > 1  class
             preds = (preds > 0.5).float()
             num_correct += (preds == y).sum()
             num_pixels += torch.numel(preds)
             
-            #Just for binary. Its a better metric than accuracy
-            dice_score += (2 * (preds * y).sum()) / (
-                (preds + y).sum() + 1e-8
-            )
+            TP = (preds * y).sum()
+            FP = (preds * (1 - y)).sum()
+            FN = ((1 - preds) * y).sum()
+            
+            dice_score += (2 * TP) / (2 * TP + FP + FN + 1e-8)  # Añadido 1e-8 para evitar división por cero
 
-    print(
-        f"Got {num_correct}/{num_pixels} with acc {num_correct/num_pixels*100:.2f}"
-    )
-    print(f"Dice score: {dice_score/len(loader)*100:.2f}")
+    # Dice score and accuracy calculation
+    accuracy = (num_correct / num_pixels * 100)
+    dice_score = (dice_score / len(loader) * 100)
+    
+    print(f"Accuracy: {accuracy:.2f}%")
+    print(f"Dice score: {dice_score:.2f}%")
+    
     model.train()
-    return num_correct/num_pixels*100 ,dice_score/len(loader)*100
+    return accuracy, dice_score
 
 def save_predictions_as_imgs(
     loader, model, folder="saved_images/", device="cuda"
