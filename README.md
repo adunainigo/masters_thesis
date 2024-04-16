@@ -32,12 +32,6 @@ Clone the repository to get started with the project:
 Details on how to set up and run the demonstrations are provided in the repository's documentation.
 
 ## Contributors
-- Iñigo Aduna Alonso (Lead Researcher)
+- Iñigo Aduna Alonso (Researcher)
 - Mathias Verbeke (Supervisor)
 - Matthias De Ryck (Co-Supervisor)
-
-## License
-This project is licensed under the terms of the MIT license.
-
-## How to Contribute
-Interested contributors can fork the project to propose changes or enhancements. Please ensure to follow the contribution guidelines outlined in the repository.
