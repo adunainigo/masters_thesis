@@ -12,32 +12,44 @@ brightness_factors = [0.8, 1.2]  # Darken by 20%, brighten by 20%
 
 def change_brightness(image, brightness_factor):
     """
-    Adjusts the brightness of an image.
+    Adjusts the brightness of the specified image by the given factor.
     
     Parameters:
-    - image: PIL.Image object to adjust.
-    - brightness_factor: Factor to adjust brightness. >1 to brighten, <1 to darken.
+    - image (PIL.Image): The image to adjust.
+    - brightness_factor (float): The factor to adjust brightness. >1 brightens the image, <1 darkens it.
     
     Returns:
-    - Adjusted PIL.Image object.
+    - PIL.Image: The adjusted image.
     """
     enhancer = ImageEnhance.Brightness(image)
     return enhancer.enhance(brightness_factor)
 
 def apply_shift(image, shift_value):
     """
-    Applies a spatial shift to an image.
+    Applies a spatial shift to the specified image based on the given shift values.
     
     Parameters:
-    - image: PIL.Image object to shift.
-    - shift_value: Tuple of integers (x_shift, y_shift) for the shift.
+    - image (PIL.Image): The image to shift.
+    - shift_value (tuple): A tuple (x_shift, y_shift) specifying the shift amounts in pixels.
     
     Returns:
-    - PIL.Image object after applying the shift.
+    - PIL.Image: The shifted image.
     """
     return image.transform(image.size, Image.AFFINE, (1, 0, shift_value[0], 0, 1, shift_value[1]))
 
 def add_noise(image, noise_type):
+    """
+    Adds specified noise type to the image.
+    
+    Currently supports Gaussian noise.
+    
+    Parameters:
+    - image (PIL.Image): The image to modify.
+    - noise_type (str): Type of noise to add, currently only "gaussian".
+    
+    Returns:
+    - PIL.Image: The noisy image.
+    """
     if noise_type == "gaussian":
         np_image = np.array(image)
         row, col, ch = np_image.shape
@@ -102,31 +114,20 @@ def dataset_augmentation(imagedir, maskdir, target_count=500):
 
 def dataset_augmentation_val(imagedir, maskdir, start_index=1000, transformations_per_image=10, total_target=40):
     """
-    Applies a set of transformations to each image in the dataset for augmentation.
-    Includes rotation, shift, and brightness adjustments.
+    Applies a series of transformations to each image in the dataset for augmentation, saving the augmented images and masks.
     
     Parameters:
-    - imagedir: Directory containing images.
-    - maskdir: Directory containing corresponding masks.
-    - start_index: Index to start naming augmented files.
-    - transformations_per_image: Number of transformations to apply per image.
-    - total_target: Total number of augmented images to generate.
+    - imagedir (str): Directory containing images.
+    - maskdir (str): Directory containing corresponding masks.
+    - start_index (int): Index to start naming augmented files.
+    - transformations_per_image (int): Number of transformations to apply per image.
+    - total_target (int): Total number of augmented images to generate.
+    
+    Operations include rotation, spatial shifts, and brightness adjustments. Each transformation is applied to the image, and the corresponding mask is processed similarly except for brightness adjustments.
     """
-    # Ensure starting from index 1000 as specified
-    current_index = start_index
-
-    # List files in the image and mask directories
-    image_files = sorted(glob(os.path.join(imagedir, "image_*.jpg")))
-    mask_files = sorted(glob(os.path.join(maskdir, "image_*.jpg")))
-    print(len(image_files))
-    print(len(mask_files))
-    # Ensure each image has a corresponding mask
-    assert len(image_files) == len(mask_files), "The number of images and masks does not match."
-
     # Define transformations
     rotations = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     shifts = [(10, 10), (-10, -10), (20, 20), (-20, -20)]
-
     transformations = [('rotate', r) for r in rotations] + \
                       [('shift', s) for s in shifts] + \
                       [('brightness', b) for b in brightness_factors]
@@ -135,6 +136,11 @@ def dataset_augmentation_val(imagedir, maskdir, start_index=1000, transformation
     random.shuffle(transformations)
     transformations = transformations[:transformations_per_image]
 
+    image_files = sorted(glob(os.path.join(imagedir, "image_*.jpg")))
+    mask_files = sorted(glob(os.path.join(maskdir, "image_*.jpg")))
+    assert len(image_files) == len(mask_files), "Each image must have a corresponding mask."
+
+    current_index = start_index
     for image_path, mask_path in zip(image_files, mask_files):
         if current_index >= start_index + total_target:
             break
@@ -146,49 +152,65 @@ def dataset_augmentation_val(imagedir, maskdir, start_index=1000, transformation
             t_type, t_value = transformation
 
             if t_type == 'rotate':
-                # Apply rotation to both the image and its mask
                 transformed_image = image.rotate(t_value)
                 transformed_mask = mask.rotate(t_value)
             elif t_type == 'shift':
-                # Apply shift to both the image and its mask
                 transformed_image = apply_shift(image, t_value)
                 transformed_mask = apply_shift(mask, t_value)
             elif t_type == 'brightness':
-                # Apply brightness change only to the image
                 transformed_image = change_brightness(image, t_value)
-                transformed_mask = mask  # Brightness change doesn't apply to mask
+                transformed_mask = mask  # Mask does not change with brightness adjustments
 
-            # Save the transformed image and mask with new indices (IMAGE_MASK_NAME)
             transformed_image.save(os.path.join(imagedir, f"image_{current_index}.jpg"))
             transformed_mask.save(os.path.join(maskdir, f"image_{current_index}_mask.jpg"))
-
             current_index += 1
             if current_index >= start_index + total_target:
                 break
             
 
 def apply_transformation(image, mask, transformation):
-    # Apply specific transformations to the image and mask
+    """
+    Applies a specified transformation to an image and its corresponding mask.
+    
+    This function handles different types of transformations including rotation, spatial shifting, adding noise,
+    and adjusting brightness. The mask is transformed similarly to the image except in cases of brightness adjustments
+    and noise addition where only the image is affected.
+    
+    Parameters:
+    - image (PIL.Image): The image to transform.
+    - mask (PIL.Image): The mask corresponding to the image.
+    - transformation (dict): A dictionary specifying the type of transformation ('rotate', 'shift', 'noise', 'brightness')
+      and the value associated with that transformation. The value could be an angle for rotation, a tuple for shift, 
+      a noise type for adding noise, or a brightness factor for adjusting brightness.
+    
+    Returns:
+    - tuple: A tuple containing the transformed image and mask.
+    """
     if transformation["type"] == "rotate":
+        # Rotate both the image and mask by the specified angle
         angle = transformation["value"]
         return image.rotate(angle), mask.rotate(angle)
     elif transformation["type"] == "shift":
+        # Shift both the image and mask by the specified x and y amounts
         shift = transformation["value"]
-        return image.transform(image.size, Image.AFFINE, (1, 0, shift[0], 0, 1, shift[1])), \
-               mask.transform(mask.size, Image.AFFINE, (1, 0, shift[0], 0, 1, shift[1]))
+        return (
+            image.transform(image.size, Image.AFFINE, (1, 0, shift[0], 0, 1, shift[1])),
+            mask.transform(mask.size, Image.AFFINE, (1, 0, shift[0], 0, 1, shift[1]))
+        )
     elif transformation["type"] == "noise":
-        # Apply noise only to the image, not the mask
+        # Add noise only to the image; the mask remains unchanged
         noisy_image = add_noise(image, transformation["value"])
-        return noisy_image, mask  # Return the mask unchanged
+        return noisy_image, mask
     elif transformation['type'] == 'brightness':
+        # Adjust brightness only for the image; the mask remains unchanged
         transformed_image = change_brightness(image, transformation['value'])
-        transformed_mask = mask  # La the mask does not change   
-        return transformed_image, transformed_mask  # Return the mask unchanged
+        return transformed_image, mask
+
+# Example usage:
+# dataset_augmentation_val(IMAGE_DIR, MASK_DIR, start_index=1000, transformations_per_image=10, total_target=50)
 
 
 
-#dataset_augmentation(IMAGE_DIR, MASK_DIR, target_count=500)
-dataset_augmentation_val(IMAGE_DIR, MASK_DIR, start_index=1000, transformations_per_image=10, total_target=50)
 
 
 
