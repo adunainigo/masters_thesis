@@ -1,5 +1,5 @@
 # AI Reliability in Industrial Safety: A Case Study with ABB IRB 1200 and Intel RealSense D415
-![Project setup](project_image.png)
+![Project setup](imgs/project_image.png)
 
 ## Overview
 This project explores the application of advanced AI techniques to enhance industrial safety with the ABB IRB 1200 robotic system and Intel RealSense D415 camera. Supervised by Mathias Verbeke and Matthias De Ryck at KU Leuven, Faculty of Engineering Technology, this work is a significant part of the academic curriculum for the Master of AI in Business and Industry, academic year 2023-2024.
