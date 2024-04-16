@@ -1,0 +1,9 @@
+[submodule "libs/robot_demonstrator"]
+	path = libs/robot_demonstrator
+	url = https://github.com/MatthiasDR96/robot_demonstrator.git
+[submodule "libs/Pytorch-UNet"]
+	path = libs/Pytorch-UNet
+	url = https://github.com/milesial/Pytorch-UNet.git
+[submodule "libs/robustness"]
+	path = libs/robustness
+	url = https://github.com/hendrycks/robustness.git
