@@ -96,7 +96,14 @@ def preprocess_image(mask_path):
 
 def predict_labels(PRED_MASK_DIR, SAVING_FOLDER):
     """
-    Loads data, predicts the labels and saves it in a folder label_i.txt
+    Predicts the labels for images in a specified directory and saves the predictions as JSON files.
+    
+    This function processes each prediction mask file in a directory, extracts features using the `preprocess_image` function,
+    and saves these features as JSON files named 'label_i.txt' where i is the identifier extracted from the file name.
+    
+    Parameters:
+    - PRED_MASK_DIR (str): Directory containing prediction mask images.
+    - SAVING_FOLDER (str): Directory to save the output JSON files.
     """
     mask_files = os.listdir(PRED_MASK_DIR)
     for mask_file in mask_files:
@@ -104,10 +111,9 @@ def predict_labels(PRED_MASK_DIR, SAVING_FOLDER):
         if match:
             i = int(match.group(1))
             mask_path = os.path.join(PRED_MASK_DIR, mask_file)
-            pieces_features = preprocess_image(mask_path)
+            pieces_features = preprocess_image(mask_path)  # Assume preprocess_image is defined elsewhere.
     
             save_path = os.path.join(SAVING_FOLDER, f'label_{i}.txt')
-            
             with open(save_path, 'w') as file:
                 json.dump(pieces_features, file)
 
@@ -179,7 +185,19 @@ def normalise_predicted_data(directory):
 
      
 def normalise_json(input_dir, scale_factors_filename):
-    # Buscar el primer archivo .txt en el directorio
+    """
+    Normalizes data in a JSON file according to scale factors provided in another JSON file.
+    
+    This function reads a JSON file containing data points, normalizes these data points using scale factors
+    (mean, standard deviation, and range normalization), and overwrites the original JSON file with normalized data.
+    
+    Parameters:
+    - input_dir (str): Directory containing the JSON file to normalize.
+    - scale_factors_filename (str): Path to the JSON file containing scale factors for normalization.
+    
+    Raises:
+    - FileNotFoundError: If no .txt JSON file is found in the input directory.
+    """
     json_file = next((f for f in os.listdir(input_dir) if f.endswith('.txt')), None)
     if not json_file:
         raise FileNotFoundError("No .txt file found in the directory.")
@@ -200,7 +218,20 @@ def normalise_json(input_dir, scale_factors_filename):
                     entry[key] = normalize_value(value, scale_factors[key])
     with open(json_path, 'w') as file:
         json.dump(data, file, indent=4)
+
+
 def normalize_value(value, factor):
+    """
+    Normalizes a value using the given scale factor details.
+    
+    Parameters:
+    - value (float/int): The value to normalize.
+    - factor (dict): A dictionary containing normalization parameters such as mean, std deviation, min, and max after std deviation.
+    
+    Returns:
+    - float: The normalized value.
+    """
+        
     if not factor:  
         return value
     norm_value = (value - factor['mean']) / factor['std'] if factor['std'] else value - factor['mean']
