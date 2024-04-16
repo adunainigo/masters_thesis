@@ -1,0 +1,17 @@
+﻿# Ignore specific files
+./pretrained_models/unet_carvana_scale0.5_epoch2.pth
+./pretrained_models/unet_carvana_scale1.0_epoch2.pth
+./tests/my_checkpoint.pth
+./tests/my_checkpoint.pth.tar
+
+# Ignore specific folders
+./tests/runs/
+./tests/pretrained/
+
+# Ignore all
+*.pth
+*.log
+*.tar
+*.zip
+*.jpg
+*.png

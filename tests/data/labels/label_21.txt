@@ -1,0 +1,14 @@
+[
+    {
+        "aspect_ratio": -1.0,
+        "eccentricity": 0.04088696142170112,
+        "area": -1.0,
+        "perimeter": -1.0,
+        "centroid": [
+            -0.20424403183023887,
+            0.983333333333333
+        ],
+        "orientation": 0.28651519371158995,
+        "convexity": true
+    }
+]
