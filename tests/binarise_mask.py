@@ -2,11 +2,24 @@ import os
 from PIL import Image
 import numpy as np
 
-# Hyperparameter
-MASKDIR = './data/val_masks' # Placeholder for the actual directory path
+# Define the directory for storing validation masks
+MASKDIR = './data/val_masks'  # Placeholder for the actual directory path
 
-# Function to convert images in a directory to binary masks
 def binary_mask(mask_dir):
+    """
+    Converts all images in the specified directory to binary masks.
+    
+    This function iterates through each image file within a directory,
+    converts it to a grayscale array, and applies a threshold to create
+    a binary mask. The binary mask is then saved in the same directory with
+    the same filename.
+    
+    Parameters:
+    mask_dir (str): The directory path that contains the image files.
+    
+    Returns:
+    None: The function saves the binary masks in the same directory and does not return any value.
+    """
     # Iterate over all files in the directory
     for filename in os.listdir(mask_dir):
         file_path = os.path.join(mask_dir, filename)
@@ -23,4 +36,6 @@ def binary_mask(mask_dir):
 # Since we cannot execute the function without a valid MASKDIR, we comment out the function call
 binary_mask(MASKDIR)
 
-# Code is ready for a real directory path to be substituted in place of the placeholder.
+
+
+
