@@ -16,25 +16,39 @@ The project follows a structured approach involving several key stages:
 
 ## Key Components
 
+## Key Components
+
 ### U-Net for Image Segmentation
-- **utils.py**: Contains utility functions for implementing the U-Net algorithm.
-- **model.py**: Provides the framework of the U-Net model architecture.
-- **train.py**: Script for training the U-Net model.
-- **test.py**: Script for testing the U-Net model.
+| Name     | Description                                    |
+|----------|------------------------------------------------|
+| utils.py | Contains utility functions for implementing the U-Net algorithm. |
+| model.py | Provides the framework of the U-Net model architecture. |
+| train.py | Script for training the U-Net model. |
+| test.py  | Script for testing the U-Net model. |
 
 ### MLP Models for Predictive Analysis
-- **mlp**: Contains the framework and training scripts for Multilayer Perceptrons (MLP) models, which predict and adjust the robot's actions in real-time.
+| Name | Description |
+|------|-------------|
+| mlp  | Contains the framework and training scripts for Multilayer Perceptrons (MLP) models, which predict and adjust the robot's actions in real-time. |
 
 ### Evaluation Metrics
-- Metrics such as accuracy, Dice score, and binary cross-entropy are used to measure the performance of the AI models.
+| Metrics    | Description |
+|------------|-------------|
+| Accuracy, Dice Score, Binary Cross-Entropy | Used to measure the performance of the AI models. |
 
 ### Dataset
-- **dataset.py** and **dataset_augmentation.py**: Manage the dataset composed of data points (image, mask, gt_label) for each piece within the robot's range of vision.
+| Name                     | Description                                                                                                   |
+|--------------------------|---------------------------------------------------------------------------------------------------------------|
+| dataset.py               | Manages the dataset composed of data points (image, mask, gt_label) for each piece within the robot's range of vision. |
+| dataset_augmentation.py  | Enhances the dataset with additional augmented data points.                                                   |
 
 ### Support Scripts
-- **Binarise_mask.py**: Ensures that the masks of the pieces are binary.
-- **Mask2label.py**: Acts as an intermediary step between the segmented mask produced by the U-Net model and the input to the MLP for predicting the position of the pieces in the robot frame. This script extracts geometric properties from the segmented image.
-- **scale_factors_gt.txt** and **scale_factors.txt**: Contain scaling and normalization factors for the MLP inputs and outputs.
+| Name                    | Description |
+|-------------------------|-------------|
+| Binarise_mask.py        | Ensures that the masks of the pieces are binary. |
+| Mask2label.py           | Intermediary script between the U-Net segmented masks and MLP input, extracting geometric properties from the segmented image. |
+| scale_factors_gt.txt    | Contains the scaling factors for normalizing MLP outputs. |
+| scale_factors.txt       | Contains the scaling factors for normalizing MLP inputs. |
 
 ## Results
 Preliminary results indicate a high degree of accuracy in object localization and a promising ability to handle operational uncertainties in real-time.
